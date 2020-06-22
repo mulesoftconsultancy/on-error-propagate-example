@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c906ec21-5d3b-499d-8ab8-00376746a1c9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="example-1Flow" doc:id="2e564f1d-3d11-4e92-b422-ca70fbd0e8e6" >
+		<http:listener doc:name="Listener" doc:id="44546ac7-c9c3-4f79-8712-21d84379d3d7" config-ref="HTTP_Listener_config" path="propagate"/>
+		<set-payload value='#["Operation Started"]' doc:name="Set Payload" doc:id="de5ba796-d7bd-44ef-a66d-81d584a87237" />
+		<ee:transform doc:name="Transform Message" doc:id="857d1f6f-a67e-4dde-a104-246257fac728" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	value : 1/0
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="12d3e78d-b45e-4961-a895-e933a8262cba" >
+				<logger level="ERROR" doc:name="Logger" doc:id="3818ab15-5cce-4299-8443-2d1f430251e2" message="Inside Error Handler #[message]"/>
+				<set-payload value='#["Error occured in Service"]' doc:name="Set Payload" doc:id="407e4da5-82d6-4b9f-ae0f-67c8db7895ea" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
